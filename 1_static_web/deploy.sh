@@ -1,1 +1,0 @@
-npm install && npm run build && cdk bootstrap && cdk deploy --all --require-approval never
