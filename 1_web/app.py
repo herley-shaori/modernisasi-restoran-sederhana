@@ -20,6 +20,21 @@ st.set_page_config(page_title="Warung Makan Sedap", layout="centered")
 st.title("Warung Makan Sedap")
 st.markdown("Selamat datang di Warung Makan Sedap! Nikmati hidangan lezat dengan harga terjangkau.")
 
+# Custom CSS to align slider values vertically
+st.markdown("""
+    <style>
+    .stSlider > div > div > div > div {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+    .stSlider > div > div > div > div > div {
+        width: 30px;
+        text-align: center;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # Display menu
 st.header("Menu")
 for item, price in menu.items():
@@ -29,8 +44,15 @@ for item, price in menu.items():
     with col2:
         st.write(f"Rp {price:,}")
     with col3:
-        # Slider for quantity
-        quantity = st.slider(f"Jumlah {item}", min_value=0, max_value=10, value=st.session_state.cart.get(item, 0), key=f"slider_{item}")
+        # Slider for quantity with non-empty label for accessibility
+        quantity = st.slider(
+            f"Jumlah {item}",  # Non-empty label for accessibility
+            min_value=0,
+            max_value=10,
+            value=st.session_state.cart.get(item, 0),
+            key=f"slider_{item}",
+            label_visibility="collapsed"  # Hide the label visually
+        )
         if quantity > 0:
             st.session_state.cart[item] = quantity
         elif item in st.session_state.cart and quantity == 0:
