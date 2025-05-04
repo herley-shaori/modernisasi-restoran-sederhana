@@ -1,4 +1,3 @@
-// elasticbeanstalk.ts
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as elasticbeanstalk from 'aws-cdk-lib/aws-elasticbeanstalk';
@@ -14,7 +13,7 @@ const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
 export interface ElasticBeanstalkProps extends cdk.StackProps {
     network: Network;
-    ecrRepository: ecr.Repository; // Add ECR repository to props
+    ecrRepository: ecr.Repository;
 }
 
 export class ElasticBeanstalk extends Construct {
@@ -35,8 +34,8 @@ export class ElasticBeanstalk extends Construct {
 
         securityGroup.addIngressRule(
             ec2.Peer.anyIpv4(),
-            ec2.Port.tcp(8501),
-            'Allow Streamlit traffic'
+            ec2.Port.tcp(80),
+            'Allow Internet traffic.'
         );
 
         const app = new elasticbeanstalk.CfnApplication(this, 'Application', {
@@ -50,7 +49,6 @@ export class ElasticBeanstalk extends Construct {
                 iam.ManagedPolicy.fromAwsManagedPolicyName('AWSElasticBeanstalkWebTier'),
                 iam.ManagedPolicy.fromAwsManagedPolicyName('AWSElasticBeanstalkMulticontainerDocker'),
                 iam.ManagedPolicy.fromAwsManagedPolicyName('AWSElasticBeanstalkWorkerTier'),
-                // Add ECR read permissions
                 iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonEC2ContainerRegistryReadOnly'),
             ],
         });
@@ -59,7 +57,6 @@ export class ElasticBeanstalk extends Construct {
             roles: [instanceRole.roleName],
         });
 
-        // Define the Dockerrun.aws.json file to specify the ECR image
         const dockerrun = {
             AWSEBDockerrunVersion: '1',
             Image: {
@@ -69,12 +66,11 @@ export class ElasticBeanstalk extends Construct {
             Ports: [
                 {
                     ContainerPort: 8501,
-                    HostPort: 80, // Map container port 8501 to host port 80
+                    HostPort: 80,
                 },
             ],
         };
 
-        // Create an application version with Dockerrun.aws.json
         const appVersion = new elasticbeanstalk.CfnApplicationVersion(this, 'AppVersion', {
             applicationName: app.applicationName!,
             sourceBundle: {
@@ -83,8 +79,6 @@ export class ElasticBeanstalk extends Construct {
             },
         });
 
-        // Ensure the S3 bucket has the Dockerrun.aws.json file
-        // You will upload this manually or via a script
         const optionSettings: elasticbeanstalk.CfnEnvironment.OptionSettingProperty[] = [
             {
                 namespace: 'aws:autoscaling:launchconfiguration',
@@ -117,6 +111,21 @@ export class ElasticBeanstalk extends Construct {
                 value: 'aws-elasticbeanstalk-service-role',
             },
             {
+                namespace: 'aws:elasticbeanstalk:application:environment',
+                optionName: 'PORT',
+                value: '8501',
+            },
+            {
+                namespace: 'aws:elasticbeanstalk:environment:process:default',
+                optionName: 'Port',
+                value: '80',
+            },
+            {
+                namespace: 'aws:elasticbeanstalk:environment:process:default',
+                optionName: 'HealthCheckPath',
+                value: '/',
+            },
+            {
                 namespace: 'aws:autoscaling:asg',
                 optionName: 'MinSize',
                 value: '1',
@@ -131,11 +140,11 @@ export class ElasticBeanstalk extends Construct {
         const env = new elasticbeanstalk.CfnEnvironment(this, 'Environment', {
             applicationName: app.applicationName!,
             environmentName: `${config.application_name}-env`,
-            solutionStackName: '64bit Amazon Linux 2023 v4.5.1 running Docker', // Use Docker platform
+            solutionStackName: '64bit Amazon Linux 2023 v4.5.1 running Docker',
             optionSettings,
             cnamePrefix: config.application_name.toLowerCase(),
             description: 'Elastic Beanstalk environment for WarungIntegrasiRasa Streamlit app',
-            versionLabel: appVersion.ref, // Reference the application version
+            versionLabel: appVersion.ref,
         });
 
         env.node.addDependency(instanceProfile);

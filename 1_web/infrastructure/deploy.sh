@@ -12,17 +12,17 @@ REGION="ap-southeast-3"
 S3_BUCKET="elasticbeanstalk-${REGION}-warungintegrasirasa"
 DOCKERRUN_FILE="Dockerrun.aws.json"
 
-# Step 1: Build the CDK project
+# Step 1: Upload Dockerrun.aws.json to S3
+echo "Uploading $DOCKERRUN_FILE to s3://$S3_BUCKET/"
+aws s3 cp "$DOCKERRUN_FILE" "s3://$S3_BUCKET/$DOCKERRUN_FILE" --region "$REGION"
+
+# Step 2: Build the CDK project
 echo "Building CDK project..."
 npm run build
 
-# Step 2: Deploy all CDK stacks
+# Step 3: Deploy all CDK stacks
 echo "Deploying CDK stacks..."
 cdk deploy --all --require-approval never
-
-# Step 3: Upload Dockerrun.aws.json to S3
-echo "Uploading $DOCKERRUN_FILE to s3://$S3_BUCKET/"
-aws s3 cp "$DOCKERRUN_FILE" "s3://$S3_BUCKET/$DOCKERRUN_FILE" --region "$REGION"
 
 # Step 4: Check if zip_and_upload.sh exists
 ZIP_SCRIPT="./zip_and_upload.sh"
