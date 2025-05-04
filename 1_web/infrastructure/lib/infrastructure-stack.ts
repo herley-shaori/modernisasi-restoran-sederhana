@@ -32,9 +32,9 @@ export class InfrastructureStack extends cdk.Stack {
     const s3 = new S3(this, 'S3');
 
     // Create Elastic Beanstalk environment
-    const elasticBeanstalk = new ElasticBeanstalk(this, 'ElasticBeanstalk', {
-      network,
-    });
+    // const elasticBeanstalk = new ElasticBeanstalk(this, 'ElasticBeanstalk', {
+    //   network,
+    // });
 
     // Apply the stack-name tag to all resources in the stack
     cdk.Tags.of(this).add('stack-name', config.stack_name);
