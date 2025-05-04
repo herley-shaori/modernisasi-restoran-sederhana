@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Network } from './network';
+import { ElasticBeanstalk } from './elasticbeanstalk';
 
 // Read and parse the configuration file
 const configPath = path.join(__dirname, '../infrastructure_config.json');
@@ -24,6 +25,11 @@ export class InfrastructureStack extends cdk.Stack {
     // Create VPC using the Network construct
     const network = new Network(this, 'Network', {
       maxAzs: 3,
+    });
+
+    // Create Elastic Beanstalk environment
+    const elasticBeanstalk = new ElasticBeanstalk(this, 'ElasticBeanstalk', {
+      network,
     });
 
     // Apply the stack-name tag to all resources in the stack

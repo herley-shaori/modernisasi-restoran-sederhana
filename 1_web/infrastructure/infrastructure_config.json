@@ -2,20 +2,19 @@
   "stack_name": "website-infrastructure",
   "region": "ap-southeast-3",
   "description": "Infrastructure for the website. I am using ElasticBeanstalk.",
+  "application_name": "WarungIntegrasiRasa",
   "network": {
     "vpcCidr": "17.0.0.0/16",
     "subnets": [
       {
         "cidrMask": 24,
         "name": "Public",
-        "type": "PUBLIC",
-        "reserved": true
+        "type": "PUBLIC"
       },
       {
         "cidrMask": 24,
         "name": "Private",
-        "type": "PRIVATE_ISOLATED",
-        "reserved": true
+        "type": "PRIVATE_ISOLATED"
       }
     ]
   }

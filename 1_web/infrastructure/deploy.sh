@@ -1,1 +1,1 @@
-cdk deploy --all --require-approval never
+npm run build & cdk deploy --all --require-approval never
