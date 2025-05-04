@@ -6,6 +6,10 @@ set -e
 # Log current working directory
 echo "Current working directory: $(pwd)"
 
+# Define variables
+PROJECT_NAME="WarungIntegrasiRasa-Build"
+REGION="ap-southeast-3"
+
 # Step 1: Build the CDK project
 echo "Building CDK project..."
 npm run build
@@ -28,4 +32,8 @@ chmod +x "$ZIP_SCRIPT"
 echo "Running $ZIP_SCRIPT to create and upload zip file..."
 "$ZIP_SCRIPT"
 
-echo "Deployment completed successfully, including zip file upload to S3"
+# Step 6: Start the CodeBuild project
+echo "Starting CodeBuild project: $PROJECT_NAME..."
+aws codebuild start-build --project-name "$PROJECT_NAME" --region "$REGION"
+
+echo "Deployment completed successfully, zip file uploaded to S3, and CodeBuild project started"
