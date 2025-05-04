@@ -37,12 +37,6 @@ export class InfrastructureStack extends cdk.Stack {
       s3Bucket: s3.bucket,
     });
 
-    // Uncomment and pass the ECR repository to ElasticBeanstalk
-    const elasticBeanstalk = new ElasticBeanstalk(this, 'ElasticBeanstalk', {
-      network,
-      ecrRepository: ecr.repository, // Pass ECR repository
-    });
-
     cdk.Tags.of(this).add('stack-name', config.stack_name);
   }
 }
