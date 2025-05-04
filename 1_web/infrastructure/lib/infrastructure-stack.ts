@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Network } from './network';
 
 // Read and parse the configuration file
 const configPath = path.join(__dirname, '../infrastructure_config.json');
@@ -13,11 +14,20 @@ export class InfrastructureStack extends cdk.Stack {
     const stackProps: cdk.StackProps = {
       ...props,
       description: config.description,
+      env: {
+        region: config.region,
+      },
     };
 
+    super(scope, id, stackProps);
+
+    // Create VPC using the Network construct
+    const network = new Network(this, 'Network', {
+      maxAzs: 3,
+      cidr: '10.0.0.0/16',
+    });
 
     // Apply the stack-name tag to all resources in the stack
-    super(scope, id, stackProps);
     cdk.Tags.of(this).add('stack-name', config.stack_name);
   }
 }
