@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Network } from './network';
 import { ElasticBeanstalk } from './elasticbeanstalk';
+import { S3 } from './s3';
 
 // Read and parse the configuration file
 const configPath = path.join(__dirname, '../infrastructure_config.json');
@@ -26,6 +27,9 @@ export class InfrastructureStack extends cdk.Stack {
     const network = new Network(this, 'Network', {
       maxAzs: 3,
     });
+
+    // Create S3 bucket for application storage
+    const s3 = new S3(this, 'S3');
 
     // Create Elastic Beanstalk environment
     const elasticBeanstalk = new ElasticBeanstalk(this, 'ElasticBeanstalk', {
