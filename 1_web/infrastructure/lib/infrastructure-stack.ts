@@ -1,13 +1,12 @@
-// infrastructure-stack.ts
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Network } from './network';
-import { ElasticBeanstalk } from './elasticbeanstalk';
 import { S3 } from './s3';
 import { ECR } from './ecr';
 import { CodeBuild } from './codebuild/codebuild';
+import { ECS } from './ecs';
 
 const configPath = path.join(__dirname, '../infrastructure_config.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
@@ -35,6 +34,11 @@ export class InfrastructureStack extends cdk.Stack {
     const codebuild = new CodeBuild(this, 'CodeBuild', {
       ecrRepository: ecr.repository,
       s3Bucket: s3.bucket,
+    });
+
+    const ecs = new ECS(this, 'ECS', {
+      vpc: network.vpc,
+      ecrRepository: ecr.repository,
     });
 
     cdk.Tags.of(this).add('stack-name', config.stack_name);
