@@ -22,11 +22,13 @@ export class Network extends Construct {
                     cidrMask: 24,
                     name: 'Public',
                     subnetType: ec2.SubnetType.PUBLIC,
+                    reserved: true, // Ensures only one public subnet is created
                 },
                 {
                     cidrMask: 24,
                     name: 'Private',
-                    subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+                    subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+                    reserved: true, // Ensures only one private subnet is created
                 },
             ],
             // Enable DNS support and hostnames
