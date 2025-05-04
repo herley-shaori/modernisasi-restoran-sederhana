@@ -39,7 +39,7 @@ export class ElasticBeanstalk extends Construct {
             ec2.Peer.anyIpv4(),
             ec2.Port.tcp(8501),
             'Allow Streamlit traffic'
-        );
+    );
 
         // Create an Elastic Beanstalk application
         const app = new elasticbeanstalk.CfnApplication(this, 'Application', {
@@ -73,6 +73,11 @@ export class ElasticBeanstalk extends Construct {
                 namespace: 'aws:autoscaling:launchconfiguration',
                 optionName: 'SecurityGroups',
                 value: securityGroup.securityGroupId,
+            },
+            {
+                namespace: 'aws:autoscaling:launchconfiguration',
+                optionName: 'IamInstanceProfile',
+                value: instanceProfile.attrArn,
             },
             {
                 namespace: 'aws:ec2:vpc',
