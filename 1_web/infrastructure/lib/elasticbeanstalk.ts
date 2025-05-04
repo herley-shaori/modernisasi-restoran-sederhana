@@ -67,7 +67,12 @@ export class ElasticBeanstalk extends Construct {
             {
                 namespace: 'aws:autoscaling:launchconfiguration',
                 optionName: 'InstanceType',
-                value: 't3.micro', // Cost-effective instance type
+                value: 't3.micro',
+            },
+            {
+                namespace: 'aws:autoscaling:launchconfiguration',
+                optionName: 'SecurityGroups',
+                value: securityGroup.securityGroupId,
             },
             {
                 namespace: 'aws:ec2:vpc',
@@ -77,12 +82,7 @@ export class ElasticBeanstalk extends Construct {
             {
                 namespace: 'aws:ec2:vpc',
                 optionName: 'Subnets',
-                value: publicSubnets.subnetIds.join(','), // Use public subnets
-            },
-            {
-                namespace: 'aws:ec2:vpc',
-                optionName: 'SecurityGroups',
-                value: securityGroup.securityGroupId,
+                value: publicSubnets.subnetIds.join(','),
             },
             {
                 namespace: 'aws:elasticbeanstalk:environment',
@@ -92,7 +92,7 @@ export class ElasticBeanstalk extends Construct {
             {
                 namespace: 'aws:elasticbeanstalk:application:environment',
                 optionName: 'PORT',
-                value: '8501', // Streamlit default port
+                value: '8501',
             },
             {
                 namespace: 'aws:autoscaling:asg',
@@ -102,7 +102,7 @@ export class ElasticBeanstalk extends Construct {
             {
                 namespace: 'aws:autoscaling:asg',
                 optionName: 'MaxSize',
-                value: '2', // Allow scaling up to 2 instances
+                value: '2',
             },
             {
                 namespace: 'aws:elasticbeanstalk:environment:process:default',
@@ -112,7 +112,7 @@ export class ElasticBeanstalk extends Construct {
             {
                 namespace: 'aws:elasticbeanstalk:environment:process:default',
                 optionName: 'HealthCheckPath',
-                value: '/', // Streamlit default path
+                value: '/',
             },
         ];
 
@@ -120,7 +120,7 @@ export class ElasticBeanstalk extends Construct {
         const env = new elasticbeanstalk.CfnEnvironment(this, 'Environment', {
             applicationName: app.applicationName!,
             environmentName: `${config.application_name}-env`,
-            solutionStackName: '64bit Amazon Linux 2023 v4.5.1 running Python 3.13', // Updated solution stack
+            solutionStackName: '64bit Amazon Linux 2023 v4.5.1 running Python 3.13',
             optionSettings,
             cnamePrefix: config.application_name.toLowerCase(),
             description: 'Elastic Beanstalk environment for WarungIntegrasiRasa Streamlit app',
@@ -129,7 +129,7 @@ export class ElasticBeanstalk extends Construct {
         // Ensure the environment depends on the instance profile
         env.node.addDependency(instanceProfile);
 
-        // Add tags to the environment (avoid reserved 'Name' tag)
+        // Add tags to the environment
         cdk.Tags.of(this).add('stack-name', config.stack_name);
         cdk.Tags.of(this).add('Application', 'WarungIntegrasiRasaEB');
     }
