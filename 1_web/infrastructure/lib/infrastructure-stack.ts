@@ -15,9 +15,9 @@ export class InfrastructureStack extends cdk.Stack {
       description: config.description,
     };
 
-    super(scope, id, stackProps);
 
     // Apply the stack-name tag to all resources in the stack
+    super(scope, id, stackProps);
     cdk.Tags.of(this).add('stack-name', config.stack_name);
   }
 }
