@@ -33,6 +33,9 @@ for ext in $allowed_extensions; do
     fi
 done
 
+# Debug: Print name_patterns to verify
+echo "Name patterns: $name_patterns" >&2
+
 # Read paths from path.json using jq and process each entry
 jq -r '.paths[]' path.json | while read -r path_entry; do
     # Check if the path contains a wildcard
@@ -42,6 +45,8 @@ jq -r '.paths[]' path.json | while read -r path_entry; do
 
         # Check if directory exists
         if [ -d "$dir_path" ]; then
+            # Debug: Print find command
+            echo "Executing find: find \"$dir_path\" -maxdepth 1 -type f \\( $name_patterns \\)" >&2
             # Loop through files in the directory that match allowed extensions
             find "$dir_path" -maxdepth 1 -type f \( $name_patterns \) | while read -r file_path; do
                 # Log reading the file
