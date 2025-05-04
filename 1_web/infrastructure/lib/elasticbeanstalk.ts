@@ -27,6 +27,20 @@ export class ElasticBeanstalk extends Construct {
             subnetType: ec2.SubnetType.PUBLIC,
         });
 
+        // Create a security group for the Elastic Beanstalk environment
+        const securityGroup = new ec2.SecurityGroup(this, 'EBSecurityGroup', {
+            vpc,
+            description: 'Security group for Elastic Beanstalk environment',
+            allowAllOutbound: true,
+        });
+
+        // Allow inbound traffic on port 8501 (Streamlit)
+        securityGroup.addIngressRule(
+            ec2.Peer.anyIpv4(),
+            ec2.Port.tcp(8501),
+            'Allow Streamlit traffic'
+        );
+
         // Create an Elastic Beanstalk application
         const app = new elasticbeanstalk.CfnApplication(this, 'Application', {
             applicationName: config.application_name,
@@ -66,6 +80,11 @@ export class ElasticBeanstalk extends Construct {
                 value: publicSubnets.subnetIds.join(','), // Use public subnets
             },
             {
+                namespace: 'aws:ec2:vpc',
+                optionName: 'SecurityGroups',
+                value: securityGroup.securityGroupId,
+            },
+            {
                 namespace: 'aws:elasticbeanstalk:environment',
                 optionName: 'ServiceRole',
                 value: 'aws-elasticbeanstalk-service-role',
@@ -101,7 +120,7 @@ export class ElasticBeanstalk extends Construct {
         const env = new elasticbeanstalk.CfnEnvironment(this, 'Environment', {
             applicationName: app.applicationName!,
             environmentName: `${config.application_name}-env`,
-            solutionStackName: '64bit Amazon Linux 2023 v4.2.5 running Python 3.11', // Compatible with Streamlit
+            solutionStackName: '64bit Amazon Linux 2023 v4.5.1 running Python 3.13', // Updated solution stack
             optionSettings,
             cnamePrefix: config.application_name.toLowerCase(),
             description: 'Elastic Beanstalk environment for WarungIntegrasiRasa Streamlit app',
@@ -110,8 +129,8 @@ export class ElasticBeanstalk extends Construct {
         // Ensure the environment depends on the instance profile
         env.node.addDependency(instanceProfile);
 
-        // Add tags to the environment
-        cdk.Tags.of(this).add('Name', 'WarungIntegrasiRasaEB');
+        // Add tags to the environment (avoid reserved 'Name' tag)
         cdk.Tags.of(this).add('stack-name', config.stack_name);
+        cdk.Tags.of(this).add('Application', 'WarungIntegrasiRasaEB');
     }
 }
