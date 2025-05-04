@@ -39,6 +39,7 @@ export class InfrastructureStack extends cdk.Stack {
     // Create CodeBuild project for building and pushing Docker images
     const codebuild = new CodeBuild(this, 'CodeBuild', {
       ecrRepository: ecr.repository,
+      s3Bucket: s3.bucket,
     });
 
     // Create Elastic Beanstalk environment

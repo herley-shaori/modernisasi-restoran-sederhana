@@ -3,6 +3,7 @@ import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -13,21 +14,29 @@ const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
 export interface CodeBuildProps extends cdk.StackProps {
     ecrRepository: ecr.Repository;
+    s3Bucket: s3.IBucket;
 }
 
 export class CodeBuild extends Construct {
-    public readonly project: codebuild.PipelineProject;
+    public readonly project: codebuild.Project;
 
     constructor(scope: Construct, id: string, props: CodeBuildProps) {
         super(scope, id);
 
+        // Define the S3 zip file name
+        const s3ZipFile = 'warung-integrasi-rasa-app.zip';
+
         // Create the CodeBuild project
-        this.project = new codebuild.PipelineProject(this, 'BuildProject', {
+        this.project = new codebuild.Project(this, 'BuildProject', {
             projectName: `${config.application_name}-Build`,
             environment: {
                 buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
                 privileged: true, // Required for Docker builds
             },
+            source: codebuild.Source.s3({
+                bucket: props.s3Bucket,
+                path: s3ZipFile,
+            }),
             buildSpec: codebuild.BuildSpec.fromSourceFilename('buildspec.yml'),
             environmentVariables: {
                 ECR_REPOSITORY_URI: {
@@ -51,6 +60,9 @@ export class CodeBuild extends Construct {
                 },
             },
         });
+
+        // Grant CodeBuild permissions to read from S3
+        props.s3Bucket.grantRead(this.project, s3ZipFile);
 
         // Grant CodeBuild permissions to push to ECR
         props.ecrRepository.grantPullPush(this.project);
