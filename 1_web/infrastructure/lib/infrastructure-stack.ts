@@ -24,7 +24,6 @@ export class InfrastructureStack extends cdk.Stack {
     // Create VPC using the Network construct
     const network = new Network(this, 'Network', {
       maxAzs: 3,
-      cidr: '10.0.0.0/16',
     });
 
     // Apply the stack-name tag to all resources in the stack

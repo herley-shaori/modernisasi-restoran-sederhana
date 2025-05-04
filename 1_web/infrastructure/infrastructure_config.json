@@ -1,5 +1,22 @@
 {
   "stack_name": "website-infrastructure",
   "region": "ap-southeast-3",
-  "description": "Infrastructure for the website. I am using ElasticBeanstalk."
+  "description": "Infrastructure for the website. I am using ElasticBeanstalk.",
+  "network": {
+    "vpcCidr": "17.0.0.0/16",
+    "subnets": [
+      {
+        "cidrMask": 24,
+        "name": "Public",
+        "type": "PUBLIC",
+        "reserved": true
+      },
+      {
+        "cidrMask": 24,
+        "name": "Private",
+        "type": "PRIVATE_ISOLATED",
+        "reserved": true
+      }
+    ]
+  }
 }
