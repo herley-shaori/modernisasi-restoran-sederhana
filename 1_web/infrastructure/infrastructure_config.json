@@ -1,0 +1,5 @@
+{
+  "stack_name": "website-infrastructure",
+  "region": "ap-southeast-3",
+  "description": "Infrastructure for the website. I am using ElasticBeanstalk."
+}
