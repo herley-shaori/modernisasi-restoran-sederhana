@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -39,6 +40,16 @@ export class CodeBuild extends Construct {
                     value: 'latest',
                 },
             },
+            logging: {
+                cloudWatch: {
+                    logGroup: new logs.LogGroup(this, 'CodeBuildLogGroup', {
+                        logGroupName: `/aws/codebuild/${config.application_name}-Build`,
+                        retention: logs.RetentionDays.ONE_MONTH,
+                        removalPolicy: cdk.RemovalPolicy.DESTROY,
+                    }),
+                    enabled: true,
+                },
+            },
         });
 
         // Grant CodeBuild permissions to push to ECR
@@ -56,6 +67,19 @@ export class CodeBuild extends Construct {
                     'ecr:UploadLayerPart',
                 ],
                 resources: ['*'],
+            })
+        );
+
+        // Add permissions for CloudWatch Logs
+        this.project.addToRolePolicy(
+            new iam.PolicyStatement({
+                actions: [
+                    'logs:CreateLogStream',
+                    'logs:PutLogEvents',
+                ],
+                resources: [
+                    `arn:aws:logs:${config.region}:${cdk.Stack.of(this).account}:log-group:/aws/codebuild/${config.application_name}-Build:*`,
+                ],
             })
         );
 
