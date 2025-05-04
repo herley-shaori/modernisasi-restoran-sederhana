@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $ECR_REPOSITORY_URI:$IMAGE_TAG .
+  post_build:
+    commands:
+      - echo Pushing the Docker image to ECR...
+      - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+      - echo Build completed on `date`
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: yes

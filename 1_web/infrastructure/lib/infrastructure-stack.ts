@@ -5,6 +5,8 @@ import * as path from 'path';
 import { Network } from './network';
 import { ElasticBeanstalk } from './elasticbeanstalk';
 import { S3 } from './s3';
+import { ECR } from './ecr';
+import { CodeBuild } from './codebuild/codebuild';
 
 // Read and parse the configuration file
 const configPath = path.join(__dirname, '../infrastructure_config.json');
@@ -30,6 +32,14 @@ export class InfrastructureStack extends cdk.Stack {
 
     // Create S3 bucket for application storage
     const s3 = new S3(this, 'S3');
+
+    // Create ECR repository for Docker images
+    const ecr = new ECR(this, 'ECR');
+
+    // Create CodeBuild project for building and pushing Docker images
+    const codebuild = new CodeBuild(this, 'CodeBuild', {
+      ecrRepository: ecr.repository,
+    });
 
     // Create Elastic Beanstalk environment
     // const elasticBeanstalk = new ElasticBeanstalk(this, 'ElasticBeanstalk', {
