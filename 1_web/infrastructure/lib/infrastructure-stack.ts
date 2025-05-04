@@ -1,3 +1,4 @@
+// infrastructure-stack.ts
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as fs from 'fs';
@@ -8,13 +9,11 @@ import { S3 } from './s3';
 import { ECR } from './ecr';
 import { CodeBuild } from './codebuild/codebuild';
 
-// Read and parse the configuration file
 const configPath = path.join(__dirname, '../infrastructure_config.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 
 export class InfrastructureStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    // Merge the provided props with the description from config
     const stackProps: cdk.StackProps = {
       ...props,
       description: config.description,
@@ -25,29 +24,25 @@ export class InfrastructureStack extends cdk.Stack {
 
     super(scope, id, stackProps);
 
-    // Create VPC using the Network construct
     const network = new Network(this, 'Network', {
       maxAzs: 3,
     });
 
-    // Create S3 bucket for application storage
     const s3 = new S3(this, 'S3');
 
-    // Create ECR repository for Docker images
     const ecr = new ECR(this, 'ECR');
 
-    // Create CodeBuild project for building and pushing Docker images
     const codebuild = new CodeBuild(this, 'CodeBuild', {
       ecrRepository: ecr.repository,
       s3Bucket: s3.bucket,
     });
 
-    // Create Elastic Beanstalk environment
-    // const elasticBeanstalk = new ElasticBeanstalk(this, 'ElasticBeanstalk', {
-    //   network,
-    // });
+    // Uncomment and pass the ECR repository to ElasticBeanstalk
+    const elasticBeanstalk = new ElasticBeanstalk(this, 'ElasticBeanstalk', {
+      network,
+      ecrRepository: ecr.repository, // Pass ECR repository
+    });
 
-    // Apply the stack-name tag to all resources in the stack
     cdk.Tags.of(this).add('stack-name', config.stack_name);
   }
 }

@@ -1,0 +1,13 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "623127157773.dkr.ecr.ap-southeast-3.amazonaws.com/warungintegrasirasa-repo:latest",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 8501,
+      "HostPort": 80
+    }
+  ]
+}
